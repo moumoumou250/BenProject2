@@ -1,0 +1,270 @@
+"""Tests for scripts/ci/arch_check.py — the checks themselves need checking.
+
+Each test builds a throwaway repo tree and asserts one violation appears (or
+does not). The last test runs the checker on the real repository: a gate that
+is never exercised is indistinguishable from a broken gate.
+"""
+from __future__ import annotations
+
+import importlib.util
+import sys
+from pathlib import Path
+
+import pytest
+
+ROOT = Path(__file__).resolve().parents[1]
+SCRIPT = ROOT / "scripts" / "ci" / "arch_check.py"
+
+
+def _load():
+    spec = importlib.util.spec_from_file_location("arch_check_under_test", SCRIPT)
+    mod = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None
+    sys.modules[spec.name] = mod
+    spec.loader.exec_module(mod)
+    return mod
+
+
+ac = _load()
+
+
+def _mk(tmp: Path, rel: str, text: str = "") -> Path:
+    p = tmp / rel
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(text, encoding="utf-8")
+    return p
+
+
+# ------------------------------------------------------------------ packages
+
+
+def test_package_must_be_registered(tmp_path):
+    _mk(tmp_path, "ben/rogue/thing.py", "x = 1\n")
+    _mk(tmp_path, "docs/ARCH.md", "| 包 | 职责 |\n|---|---|\n| `ben/core` | kernel |\n")
+
+    keys = [v["key"] for v in ac.check_packages(tmp_path)]
+    assert "ben/rogue" in keys
+
+
+def test_registered_package_passes(tmp_path):
+    _mk(tmp_path, "ben/core/thing.py", "x = 1\n")
+    _mk(tmp_path, "docs/ARCH.md", "| 包 | 职责 |\n|---|---|\n| `ben/core` | kernel |\n")
+
+    assert ac.check_packages(tmp_path) == []
+
+
+def test_tests_do_not_live_inside_a_package(tmp_path):
+    _mk(tmp_path, "ben/core/thing.py", "x = 1\n")
+    _mk(tmp_path, "ben/core/test_thing.py", "def test_x(): pass\n")
+    _mk(tmp_path, "docs/ARCH.md", "| 包 | 职责 |\n|---|---|\n| `ben/core` | kernel |\n")
+
+    details = " ".join(v["detail"] for v in ac.check_packages(tmp_path))
+    assert "belongs in tests/" in details
+
+
+# ---------------------------------------------------------------- duplicates
+
+_DUP_BODY = '''\
+def _handler_a(request):
+    payload = parse(request)
+    value = compute(payload)
+    checked = validate(value)
+    store = open_store()
+    store.write(checked)
+    log = build_log(checked)
+    emit(log)
+    return checked
+'''
+
+
+def test_identical_functions_in_two_files_are_flagged(tmp_path):
+    _mk(tmp_path, "ben/core/a.py", _DUP_BODY)
+    _mk(tmp_path, "ben/kb/b.py", _DUP_BODY.replace("_handler_a", "_handler_b"))
+
+    found = ac.check_duplicates(tmp_path)
+    assert len(found) == 1
+    assert "identical source" in found[0]["detail"]
+
+
+def test_one_function_is_not_a_duplicate(tmp_path):
+    _mk(tmp_path, "ben/core/a.py", _DUP_BODY)
+
+    assert ac.check_duplicates(tmp_path) == []
+
+
+# -------------------------------------------------------------- third_party
+
+
+def test_module_level_third_party_import_is_flagged(tmp_path):
+    _mk(tmp_path, "ben/core/a.py", "import requests\n\n\ndef go():\n    return requests\n")
+
+    keys = [v["key"] for v in ac.check_third_party(tmp_path)]
+    assert keys == ["ben/core/a.py:1"]
+
+
+def test_lazy_import_is_allowed_in_llm_layer(tmp_path):
+    _mk(tmp_path, "ben/llm/sdk.py", "def call():\n    import openai\n    return openai\n")
+
+    assert ac.check_third_party(tmp_path) == []
+
+
+def test_lazy_import_is_not_a_licence_for_other_layers(tmp_path):
+    _mk(tmp_path, "ben/core/a.py", "def call():\n    import openai\n    return openai\n")
+
+    assert len(ac.check_third_party(tmp_path)) == 1
+
+
+# ------------------------------------------------------------------ orphans
+
+
+def test_orphan_pyc_is_flagged(tmp_path):
+    _mk(tmp_path, "ben/core/__pycache__/gone.cpython-313.pyc", "")
+
+    keys = [v["key"] for v in ac.check_orphans(tmp_path)]
+    assert keys == ["ben/core/__pycache__/gone.cpython-313.pyc"]
+
+
+def test_live_pyc_is_fine(tmp_path):
+    _mk(tmp_path, "ben/core/alive.py", "x = 1\n")
+    _mk(tmp_path, "ben/core/__pycache__/alive.cpython-313.pyc", "")
+
+    assert ac.check_orphans(tmp_path) == []
+
+
+# -------------------------------------------------------------- stale_refs
+
+
+def test_unresolvable_review_id_is_flagged(tmp_path):
+    _mk(tmp_path, "ben/core/a.py", f"# why: because (review {'H9'})\nx = 1\n")
+
+    keys = [v["key"] for v in ac.check_stale_refs(tmp_path)]
+    assert keys == ["ben/core/a.py:1"]
+
+
+def test_review_id_resolves_against_the_index(tmp_path):
+    _mk(tmp_path, "ben/core/a.py", f"# why: because (review {'H9'})\nx = 1\n")
+    _mk(tmp_path, "docs/reviews/INDEX.md", "| H9 | retired | reason |\n")
+
+    assert ac.check_stale_refs(tmp_path) == []
+
+
+def test_adr_reference_must_exist(tmp_path):
+    _mk(tmp_path, "ben/core/a.py", f"# see [adr:{'0042'}]\nx = 1\n")
+    assert len(ac.check_stale_refs(tmp_path)) == 1
+
+    _mk(tmp_path, "docs/adr/0042-some-decision.md", "# 0042\n")
+    assert ac.check_stale_refs(tmp_path) == []
+
+
+# ------------------------------------------------------------ agents_budget
+
+
+def test_agents_budget_is_enforced(tmp_path):
+    head = "<!-- generated by ben; edit or remove this marker to keep this file -->\n"
+    _mk(tmp_path, "AGENTS.md", head + "rule\n" * ac.RULE_BUDGET)
+
+    assert ac.check_agents_budget(tmp_path) != []
+
+
+def test_hand_written_agents_file_is_out_of_scope(tmp_path):
+    _mk(tmp_path, "AGENTS.md", "my own rules\n" * (ac.RULE_BUDGET + 10))
+
+    assert ac.check_agents_budget(tmp_path) == []
+
+
+# ------------------------------------------------------------ runtime_paths
+
+
+def test_runtime_dir_name_is_spelled_in_one_place(tmp_path):
+    _mk(tmp_path, ".gitignore", "/runs/\n")
+    _mk(tmp_path, "ben/core/paths.py", 'DEFAULT_RUNTIME_DIR = "runs"\n')
+    _mk(tmp_path, "ben/core/other.py", 'OUT = "runs"\n')
+
+    keys = [v["key"] for v in ac.check_runtime_paths(tmp_path)]
+    assert keys == ["ben/core/other.py:1"]
+
+
+def test_paths_module_itself_may_declare_the_name(tmp_path):
+    _mk(tmp_path, ".gitignore", "/runs/\n")
+    _mk(tmp_path, "ben/core/paths.py", 'DEFAULT_RUNTIME_DIR = "runs"\n')
+
+    assert ac.check_runtime_paths(tmp_path) == []
+
+
+def test_runtime_dir_must_be_ignored(tmp_path):
+    _mk(tmp_path, ".gitignore", "__pycache__/\n")
+    _mk(tmp_path, "ben/core/paths.py", 'DEFAULT_RUNTIME_DIR = "runs"\n')
+
+    keys = [v["key"] for v in ac.check_runtime_paths(tmp_path)]
+    assert keys == [".gitignore"]
+
+
+def test_prose_mentioning_the_dir_is_not_a_violation(tmp_path):
+    _mk(tmp_path, ".gitignore", "/runs/\n")
+    _mk(tmp_path, "ben/core/a.py", 'HELP = "output goes to the runs dir"\n')
+    assert ac.check_runtime_paths(tmp_path) == []
+
+
+def test_hardcoded_path_mapping_is_flagged(tmp_path):
+    """`"runs/<name>/.ben"` is the same hardcoded layout as `"runs"`."""
+    _mk(tmp_path, ".gitignore", "/runs/\n")
+    _mk(tmp_path, "ben/commands/a.py", 'STORE = "runs/{name}/.ben"\n')
+
+    keys = [v["key"] for v in ac.check_runtime_paths(tmp_path)]
+    assert keys == ["ben/commands/a.py:1"]
+
+
+# --------------------------------------------------------------- root_layout
+
+
+def test_undeclared_root_directory_is_flagged(tmp_path):
+    (tmp_path / "mystery").mkdir()
+
+    keys = [v["key"] for v in ac.check_root_layout(tmp_path)]
+    assert keys == ["mystery"]
+
+
+def test_undeclared_root_file_is_flagged(tmp_path):
+    _mk(tmp_path, "notes.txt", "scratch\n")
+
+    keys = [v["key"] for v in ac.check_root_layout(tmp_path)]
+    assert keys == ["notes.txt"]
+
+
+def test_declared_entries_pass(tmp_path):
+    for name in ("ben", "tests", "docs", "lab", "scripts"):
+        (tmp_path / name).mkdir()
+    for name in ("README.md", "AGENTS.md", ".gitignore", ".env.example"):
+        _mk(tmp_path, name, "")
+
+    assert ac.check_root_layout(tmp_path) == []
+
+
+def test_hidden_environment_dirs_are_not_root_entries(tmp_path):
+    for name in (".git", ".venv", ".workbuddy", ".Trash-0"):
+        (tmp_path / name).mkdir()
+
+    assert ac.check_root_layout(tmp_path) == []
+
+
+def test_rejection_says_where_it_should_have_gone(tmp_path):
+    (tmp_path / "recon").mkdir()
+
+    detail = ac.check_root_layout(tmp_path)[0]["detail"]
+    assert "lab/" in detail
+
+
+def test_unknown_name_still_gets_an_actionable_hint(tmp_path):
+    (tmp_path / "whatever").mkdir()
+
+    detail = ac.check_root_layout(tmp_path)[0]["detail"]
+    assert "ROOT_FILES / ROOT_DIRS" in detail
+
+
+# ------------------------------------------------------------- the real repo
+
+
+def test_this_repository_is_clean(capsys):
+    """The gate must be green on main. If this fails, fix the finding — do not
+    baseline it without an expiry date."""
+    assert ac.main(["--json"]) == 0, capsys.readouterr().out

@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+"""ben CLI launcher.
+
+Adds the repository root (the directory containing the `ben` package,
+`scripts/`, `skills/` and `tests/`) to sys.path, then delegates to
+ben.cli:main. Symlinked into ~/.local/bin by scripts/install.sh and into
+/home/agent/.local/bin by the Docker images.
+
+If a repo-local .venv exists with openai installed and the current
+interpreter lacks it, re-exec under .venv/bin/python
+(scripts/install.sh --with-sdk).
+"""
+import os
+import sys
+from pathlib import Path
+
+# Make `ben auto` progress visible when stdout is piped/redirected.
+os.environ.setdefault("PYTHONUNBUFFERED", "1")
+try:
+    sys.stdout.reconfigure(line_buffering=True)  # type: ignore[attr-defined]
+    sys.stderr.reconfigure(line_buffering=True)  # type: ignore[attr-defined]
+except Exception:
+    pass
+
+REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT))
+
+_venv_py = REPO_ROOT / ".venv" / "bin" / "python"
+if _venv_py.is_file() and Path(sys.executable).resolve() != _venv_py.resolve():
+    try:
+        import openai  # noqa: F401
+    except ImportError:
+        import os
+        os.execv(str(_venv_py), [str(_venv_py), str(Path(__file__).resolve()), *sys.argv[1:]])
+
+from ben.cli import main  # noqa: E402
+
+if __name__ == "__main__":
+    sys.exit(main())

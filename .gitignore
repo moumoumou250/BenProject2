@@ -7,16 +7,29 @@ venv/
 
 # Rendered graph snapshots / local artifacts (generated, not source)
 *.html
-!lib/view_template.html
+!ben/web/template.html
 fact-graph.html
 
+# THE runtime output root (ben/core/paths.py). Everything a session generates
+# lives here: worker registry (workers.json), logs/, console/ PTY sockets,
+# HTML snapshots, and one .ben/ graph per challenge. Never source, never
+# committed. `scripts/ci/arch_check.py --check runtime_paths` enforces this
+# line's presence and bans the literal anywhere in ben/.
+/runs/
+
+# Archived assessment material (target data, not this project's assets).
+# Tracked files must be `git rm -r --cached`d once before this takes effect —
+# see lab/*/README.md and docs/OPTIMIZATION-PLAN-v2.md §P0-A.
+/lab/
+
 # Per-project fact-graph data — belongs in the *using* project, not here.
-# (this only matters if someone runs `fgc` inside this repo)
+# (this only matters if someone runs `ben` inside this repo)
+.ben/
 .fg/
 .fg-claude/
 
-# Stray session logs / scratch
-agents/
+# Stray session logs / scratch (repo-root only: never ignore ben/agents/)
+/agents/
 *.log
 .DS_Store
 .idea/
@@ -28,5 +41,18 @@ dist/*.tar.gz
 # private docs — never public
 HANDOVER.md
 PREP-INTERVIEW.md
-docker/ENV-COMMANDER.md
 COMMANDER-HANDOVER.md
+
+# local tooling artifacts
+.Trash-0/
+.workbuddy/
+.pytest_cache/
+.screenshots/
+
+# one-off verification trees: a test that does mkdtemp(dir=".") must not be
+# able to leave a directory behind in the repo root
+.verify-*/
+
+# secrets: real .env never ships; the documented template .env.example does
+.env
+.env.local

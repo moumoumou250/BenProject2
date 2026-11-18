@@ -1,0 +1,59 @@
+[project]
+name = "ben"
+version = "0.1.0"
+description = "Engagement fact-graph CLI for agentic work"
+requires-python = ">=3.11"
+readme = "README.md"
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "ruff>=0.8", "import-linter>=2.1"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+extend-exclude = ["lab", "runs", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "PLC2701"]
+ignore = ["E501"]  # line length handled by formatter preference; plan allows 100
+
+[tool.ruff.lint.per-file-ignores]
+"ben/commands/auto.py" = ["TID251"]  # brief pause between explores (RPM)
+"ben/__init__.py" = ["PLC2701", "F401"]
+"ben/core/*" = ["PLC2701"]
+"ben/llm/*" = ["PLC2701"]
+"tests/*" = ["PLC2701"]
+"scripts/*" = ["PLC2701"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"subprocess".msg = "改用 ben.runtime.exec(cmd, timeout=...)：它统一处理超时、编码与退出码"
+"time.sleep".msg = "禁止 sleep 兜底：请改为显式等待状态"
+
+[tool.importlinter]
+root_packages = ["ben"]
+
+[[tool.importlinter.contracts]]
+name = "core 不得依赖上层"
+type = "forbidden"
+source_modules = ["ben.core"]
+forbidden_modules = ["ben.commands", "ben.agents", "ben.web", "ben.runtime"]
+
+[[tool.importlinter.contracts]]
+name = "agents 不得依赖 commands"
+type = "forbidden"
+source_modules = ["ben.agents"]
+forbidden_modules = ["ben.commands"]
+
+[[tool.importlinter.contracts]]
+name = "命令模块之间不得互相 import auto"
+type = "forbidden"
+source_modules = ["ben.commands"]
+forbidden_modules = ["ben.commands.auto"]
+# ben.cli (entry hub) may import cmd_auto; it is outside ben.commands.
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+markers = [
+  "perf: performance gate (set BEN_PERF=1 to run)",
+]

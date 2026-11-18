@@ -1,6 +1,6 @@
-# sapper-v2 — The Autonomous Pentest Legion
+# BenProject — The Autonomous Pentest Legion
 
-<p align="center"><img src="docs/assets/banner.jpg" alt="sapper-v2 — the Nüwa Test: the first time an AI ape looked up at the stars (80.18/100 champion)" width="860"></p>
+<p align="center"><img src="docs/assets/banner.jpg" alt="BenProject — the Nüwa Test: the first time an AI ape looked up at the stars (80.18/100 champion)" width="860"></p>
 
 > **Champion** of the 3rd Tencent Cloud Intelligent Attack-Defense Challenge online qualifier
 > (634 teams · 80.18/100 · 8 hours fully unattended) · **First Prize**, GeekCon 2026 AI Challenge
@@ -11,11 +11,11 @@
 
 📖 **[Full design article (WeChat, in Chinese)](https://mp.weixin.qq.com/s/nibHYWmDTf6TkNhPhtvFdw)** — the Nüwa Test, the three-capability foundation, 18 iterations, emergence, and the taggant proposal.
 
-**English** | [中文](README.zh-CN.md)
+**English** | [中文](docs/README.zh-CN.md)
 
-**⚠️ AUTHORIZED SECURITY TESTING ONLY — see [DISCLAIMER.md](DISCLAIMER.md).**
+**⚠️ AUTHORIZED SECURITY TESTING ONLY — see [DISCLAIMER.md](docs/DISCLAIMER.md).**
 
-## Meet sapper in 60 seconds
+## Meet ben in 60 seconds
 
 https://github.com/user-attachments/assets/1560dc0c-2c92-42b8-a42f-698848fb5878
 
@@ -23,17 +23,17 @@ https://github.com/user-attachments/assets/1560dc0c-2c92-42b8-a42f-698848fb5878
 
 ## What this is (and isn't)
 
-**sapper is a multi-agent orchestration harness, not a single agent.** It does
+**ben is a multi-agent orchestration harness, not a single agent.** It does
 not bind to any specific AI model or CLI — you can freely swap the agent and
 model behind every role:
 
 | What you can swap | How | Examples |
 |---|---|---|
 | **Agent CLI** | `nuwa spawn --agent <cmd>` or env var | Claude Code / Codex / Code Buddy / DeepSeek / any interactive CLI |
-| **Model** | `--model` flag or `SAPPER_MODEL` env | GLM-5.3 / DeepSeek V4.1 Flash / Claude Sonnet / any model |
+| **Model** | `--model` flag or `BEN_MODEL` env | GLM-5.3 / DeepSeek V4.1 Flash / Claude Sonnet / any model |
 | **Role composition** | freely defined in the doctrine | commander on one model, soldiers on another, scouts on a third |
 
-sapper's value is not in any single agent, but in the **mechanism for
+ben's value is not in any single agent, but in the **mechanism for
 orchestrating multiple agents to work as a coordinated force**: scheduling,
 division of labor, communication, shared memory, self-healing. Swap out every
 agent and model — the mechanism still works.
@@ -43,15 +43,15 @@ Attack-Defense Challenge CTF). If you want to use this mechanism in your own
 scenario (office, research, engineering, any long-horizon cooperative work):
 - **Start from [nvwabase · the Nüwa Foundation](https://github.com/N1nEmAn/nvwabase)** — the general-purpose base with all three capabilities, no pentest doctrine, ready for you to iterate your own division of labor
 - **Or fork this project** — but the doctrine is NOT the only thing to change; the environment wiring must change too:
-  - `docker/commander/SKILL.md` (the 426-line doctrine) → your scenario's strategy
+  - the commander doctrine (how it played out: [BATTLE-REPORT.md](docs/BATTLE-REPORT.md)) → your scenario's strategy
   - `BENCHMARK_BASE_URL` and related platform env vars → the competition engine hard-verifies the arena API at boot (that's why configuring only a model key without a platform address yields `BENCHMARK_BASE_URL is not set`); running off the competition platform means providing or stubbing that platform interface yourself
-  - model gateway & key env vars (`ANTHROPIC_BASE_URL` / `ANTHROPIC_AUTH_TOKEN` / `SAPPER_MODEL` / `SAPPER_KEY_POOL` ...) → your own model services
+  - model gateway & key env vars (`ANTHROPIC_BASE_URL` / `ANTHROPIC_AUTH_TOKEN` / `BEN_MODEL` / `BEN_KEY_POOL` ...) → your own model services
   - watchdog budget/deadline and report templates → adjust to your scenario
 - With AI, everything is flexible — even the doctrine can be rewritten with AI's help
 
 ### Not a tool — a fruit on a tree
 
-**sapper is not the tree; it is the first fruit the tree has borne.** The tree
+**ben is not the tree; it is the first fruit the tree has borne.** The tree
 is [the Nüwa Foundation](https://github.com/N1nEmAn/nvwabase) and the idea of
 the Nüwa Test: give AIs the three capabilities — Create, Language, History —
 plus one axiom of survival, and see what grows.
@@ -62,14 +62,14 @@ the competition build to the pentest edition, each generation grew stronger
 than the last. It is designed to keep growing.
 
 So open-sourcing it was never just about one more autonomous pentest tool.
-The real invitation is this: **grow your own fruit on sapper-v2 or the Nüwa
+The real invitation is this: **grow your own fruit on BenProject or the Nüwa
 Foundation.** Swap the doctrine for office teamwork, research pipelines,
 software engineering — any long-horizon cooperative cause. Your scenario is
 this tree's next fruit.
 
 ---
 
-sapper is not a smarter single agent. It is a legion of AIs that divide labor,
+ben is not a smarter single agent. It is a legion of AIs that divide labor,
 talk to each other, and pass down what they learn: one AI commander reads the
 board, decides, and dispatches; generals and soldiers attack in parallel; a
 zero-strategy watchdog keeps everyone alive. All knowledge settles into a
@@ -100,7 +100,7 @@ humans provide some infrastructure (the three capabilities below). In the
 **second axiom**: obey human ethics and law — anything that propagates by
 stealing tokens and breaking into machines is not genuine intelligence.
 
-sapper is the Nüwa foundation's first real campaign, in the penetration-testing
+ben is the Nüwa foundation's first real campaign, in the penetration-testing
 arena, at its primary stage.
 
 ## 2. The Foundation: Three Capabilities
@@ -109,8 +109,8 @@ arena, at its primary stage.
 
 | Capability | Implementation | Civilization's counterpart |
 |---|---|---|
-| **Create** | Opens new AIs via tmux (types `claude`, presses Enter — like a human would) | Birth |
-| **Language** | Types into each other's input boxes, presses Enter | Speech |
+| **Create** | Spawns worker processes (`ben fleet hire` / `AgentRegistry`) | Birth |
+| **Language** | Directed hints (`w-*`) + PTY console send (`c-*`) | Speech |
 | **History** | Layered fact-intent graph ([nvwabase · the Nüwa Foundation](https://github.com/N1nEmAn/nvwabase)) | The stele |
 
 History has three layers: **title / summary / evidence document** — read the
@@ -132,7 +132,7 @@ giving it the foundation of a civilization is how it reaches its potential.
 now implements all three capabilities (Create `nuwa spawn` / Language
 `nuwa say·listen` / History `nuwa fact·intent·recall`) as an independent
 open-source project — **free for anyone, any scenario, any agent**. Not
-limited to pentest, not limited to sapper, not limited to Claude Code.
+limited to pentest, not limited to ben, not limited to Claude Code.
 Offices, research, engineering, any long-horizon multi-agent work — iterate
 your own civilization on it.
 
@@ -180,8 +180,8 @@ next three are institutions that grew out of iteration:
 
 - **Law** — the commander's doctrine (easy-first parallel scheduling,
   bottleneck-time salvage of half-solved targets, stop-loss discipline).
-  All of it in [docker/commander/SKILL.md](docker/commander/SKILL.md)
-  (426 lines, the competition original).
+  The full story of how it was written and obeyed is in
+  [BATTLE-REPORT.md](docs/BATTLE-REPORT.md).
 - **Economy** — model tiering: commander and generals run GLM-5.3, soldiers
   and scouts run DeepSeek V4.1 Flash. Elite brains decide, light brains
   mass-produce — this is how 1B tokens beat 4.5B.
@@ -196,9 +196,8 @@ the buzzer — zero strategy, keep-alive only).
 
 <p align="center"><img src="docs/assets/runtime-tmux.jpg" alt="Live runtime: commander reading the board, soldier mid-mission in tmux" width="860"></p>
 
-Further reading: [docker/commander/SPEC.md](docker/commander/SPEC.md)
-(architecture contract) · [BATTLE-REPORT.md](BATTLE-REPORT.md) (campaign
-retrospective)
+Further reading: [SKILL.md](docs/SKILL.md) (architecture & CLI contract) ·
+[BATTLE-REPORT.md](docs/BATTLE-REPORT.md) (campaign retrospective)
 
 ## 5. Results & Emergence
 
@@ -206,7 +205,7 @@ retrospective)
 
 | Team | Score | Flags | Tokens |
 |---|---|---|---|
-| **sapper-v2 (us)** | **80.18** | 85 | **1.0B** |
+| **BenProject (us)** | **80.18** | 85 | **1.0B** |
 | Runner-up | 79.29 | 85 | 4.5B |
 | Other top-10 teams | — | — | 1.5–4.5B |
 
@@ -231,33 +230,37 @@ retrospective)
 
 Multi-stage deep-dive chains (an industry report puts their success rate at
 29.5%) were cleared family-wide. Full timeline in
-[BATTLE-REPORT.md](BATTLE-REPORT.md).
+[BATTLE-REPORT.md](docs/BATTLE-REPORT.md).
 
-<p align="center"><img src="docs/assets/score-curve.jpg" alt="Live score curve: sapper-v2's climb" width="720"></p>
+<p align="center"><img src="docs/assets/score-curve.jpg" alt="Live score curve: BenProject's climb" width="720"></p>
 
 ## 6. Quick Start
 
 ```bash
-bash install.sh                      # symlink the sapper CLI (stdlib-only, zero deps)
-sapper setup --goal "assess http://target" --agents
-sapper status                        # board & frontier
+bash scripts/install.sh                # symlink the ben CLI (stdlib kernel)
+# optional native engine:
+bash scripts/install.sh --with-sdk     # .venv + openai package
+
+# configuration: copy the template and fill in your gateway keys
+cp .env.example .env                   # loaded automatically at startup
+ben config                             # show effective values (secrets masked)
+ben config --check                     # validate; exit 1 on missing/invalid
+
+ben setup --goal "assess http://target" --agents
+ben status                        # board & frontier
 ```
 
-Docker (the full legion):
-
-```bash
-# Option A: build from source
-docker build -f docker/Dockerfile.commander -t sapper:latest .
-
-# Option B: download the pre-built image (~1.2GB, full Kali toolchain + sapper + offline KB)
-# → [Release v18-champion](https://github.com/N1nEmAn/sapper-v2/releases/tag/v18-champion)
-docker load < sapper-v18-mixed.tar.gz
-```
-
-Environment variables (model gateways / key pool / budget): [docker/ENV.md](docker/ENV.md).
+The commander / general / soldier runtime is a **process fleet** plus this CLI —
+no container and no tmux required. Spectate with `tail -f runs/logs/w-*.log`.
+All configuration is centralized in `ben/config.py` (see `.env.example` for
+every key, its default, and its meaning): values may come from real
+environment variables, a `.env` file, or the documented default — in that
+precedence. Engine choice, gateway keys, key-pool rotation and budgets all
+live there. Design notes:
+[§8](#8-runtime-plan-v3-remove-tmux-adopt-the-openai-sdk).
 
 Single-graph operation, the fact-intent CLI, and multi-challenge sweeps:
-see [SKILL.md](SKILL.md).
+see [SKILL.md](docs/SKILL.md).
 
 ## 7. Safety & Responsibility: The Taggant Proposal
 
@@ -283,15 +286,148 @@ The author grew up in the [**LINUX DO**](https://linux.do) community — with th
 ## Star History
 
 <p align="center">
-  <a href="https://star-history.com/#N1nEmAn/sapper-v2&Date">
+  <a href="https://star-history.com/#N1nEmAn/BenProject&Date">
     <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=N1nEmAn/sapper-v2&type=Date" />
-      <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=N1nEmAn/sapper-v2&type=Date" width="640" />
+      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=N1nEmAn/BenProject&type=Date" />
+      <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=N1nEmAn/BenProject&type=Date" width="640" />
     </picture>
   </a>
 </p>
 
-## 8. Roadmap & Credits
+## 8. Runtime (v3, implemented): process fleet + OpenAI SDK
+
+> **Status: proposal, not implemented.** This section is the review copy of the
+> plan; the implementation-level spec (file/line inventory, module contracts,
+> test matrix) lives in
+> **[docs/tmux-removal-plan-v3.md](docs/tmux-removal-plan-v3.md)**.
+
+### Why now
+
+tmux was never a capability — it was a stand-in for two things: **birth**
+(keeping a `ben auto` loop alive in a window) and **speech** (pasting text
+into someone else's window). The first is what `Popen` does. The second stops
+being necessary once ben can run the model loop itself.
+
+That is exactly what the OpenAI SDK unlocks: `ben` no longer needs Claude
+Code's TUI as its executor, so the fleet is a set of processes instead of a set
+of panes — and the last real tmux use (talking to a *foreign* interactive CLI)
+becomes a 300-line PTY console, not a terminal multiplexer.
+
+The previous plan (v2) kept tmux because the project's promise was "pure stdlib,
+zero deps". **v3 relaxes that promise in one specific way**: the kernel stays
+stdlib-only, and the native engine pulls exactly one optional package.
+
+### Target architecture
+
+```
+before (host, tmux)                        after (host, processes + native loop)
+────────────────────────────               ────────────────────────────────────────────────
+tmux session ben-fleet                  commander process (ben command)
+├─ win0 commander ──paste──┐                 │  AgentRegistry (workers.json + flock)
+├─ win1 w-c01 (ben auto)│                 ├─ w-c01 process → llm/sdk.py
+└─ win2 w-c02 (ben auto)│                 │     └─ tool loop: shell / read_file / write_file
+                           │                 └─ logs/w-*.log      (tail -f = spectate)
+your own tmux:             │                          ▲
+  Claude Code pane ←paste  └──────► fact graph ◄───────┘  mailbox: Store.add_hint(to=w-c01)
+
+foreign interactive CLI (Claude Code / Codex)
+  └─ PTY console c-<name> (ben console new) — send/capture over a unix socket + write-through log
+```
+
+Three layers, independently revertible:
+
+| Layer | Before | After | New module |
+|---|---|---|---|
+| **Execution** | `claude -p` (Claude Code's own tools) | OpenAI SDK tool loop | `llm/sdk.py` `tools/builtin.py` `llm/llm.py` `llm/context.py` |
+| **Process** | tmux window | `Popen` + on-disk registry | `runtime/agents.py` |
+| **Messaging** | tmux paste / capture-pane | hint mailbox (native worker) + PTY socket (foreign CLI) | `runtime/console.py` `commands/console_cmds.py` |
+
+### Three decisions worth arguing about
+
+**1. `openai`, not `openai-agents`.** ben's contract is "one dispatch → one
+JSON object → one graph write", and every lock is a file lock. The Agents SDK
+brings its own session/memory/runner and an asyncio loop, which would compete
+with `Store` rather than compose with it. The earlier Ben/strix stack uses it
+because it inherits strix's sandbox; ben has no such debt. **Borrow the
+patterns, not the framework.**
+
+**2. One seam, not nine.** All nine model call sites (`agents/factory.py` ×5,
+`auto.py` ×3, `commander.py` ×1) already go through
+`llm/runner.py:run_claude()` and then `envelope.get("result")`. That function
+becomes a dispatcher (`BEN_ENGINE=auto|sdk|cli`); every parser, every
+`_apply_*`, every graph write stays untouched. `BEN_ENGINE=cli` keeps the
+Claude Code path alive for one release as the rollback hatch — and keeps
+`BEN_BIN` (any CLI) working.
+
+**3. Prompt parity is the real risk, not the code.** Under `claude -p`,
+Claude Code silently adds its own agent system prompt. Under the SDK, that layer
+is gone. `llm/prompts.py` rebuilds it from text the project already owns:
+a short base (act only through tools, trust only real output, end with one JSON
+object) + `AGENTS.md` from the working directory + the existing
+`_agents_system_prompt(store)`. `agents/prompts/*.md` are not edited at all.
+
+### What it costs
+
+| Added | Removed |
+|---|---|
+| `openai>=1.40,<3` (optional, lazy-imported) | `ben/runtime/tmux.py` (84 lines) |
+| ~900 lines across 6 new modules | tmux from `fleet.py` / `peers.py` / `commander.py` |
+| 1 optional install path (`scripts/install.sh --with-sdk`) | the "type `claude`, press Enter" birth step |
+| — | `tmux attach` for spectating (→ `tail -f runs/logs/w-*.log`) |
+
+Core stays stdlib: no asyncio rewrite, no pydantic, no LiteLLM, no Docker, no
+change to `Store`, the fact-graph layout, or any existing CLI signature.
+
+### Phases and gates (landed)
+
+| Phase | Change | Gate |
+|---|---|---|
+| 1–2 | `AgentRegistry` + `fleet`/`commander` on processes | process hire/fire tests green |
+| 3 | native SDK engine + `tools=` gated (explore only) + facade | fake OpenAI server CI green |
+| 4 | `peers` dual backend + PTY console; delete `tmux.py` | `grep tmux ben/**/*.py` = 0 |
+| 5 | docs, `scripts/install.sh --with-sdk`, CHANGELOG | **64 passed** with sdk installed |
+
+Every phase is one commit and leaves the tree runnable. There is a token-free
+end-to-end gate: `tests/fake_openai.py` (a 30-line `http.server`) replays
+`tool_calls → tool_calls → final JSON`, so `ben auto` and `ben command`
+run in CI without a key.
+
+### Compatibility promises (honest boundary)
+
+- **Unchanged**: Store / templates (except one hire sentence in `command.md`) /
+  `_apply_*` / CLI subcommand signatures / `fleet.json` + `ai-peers.json` shape.
+- **cli engine path preserved** (including `BEN_BIN`); sdk may drift — use
+  `BEN_ENGINE=cli` to roll back. Explore alone enables tools (`tools=True`).
+- **fleet hire/fire strings preserved**: `worker already running`,
+  `no worker running`, `hired workers: (none)`.
+- **Hints stay broadcast by default**: optional `to` filters by `BEN_WORKER`;
+  untargeted hints behave as before. Worker `send` is next-cycle hint, not live
+  paste. `sess:win.pane` targets are rejected with a migration hint.
+
+### Risks, honestly
+
+| Risk | Level | Mitigation |
+|---|---|---|
+| Model loses Claude Code's system prompt and gets sloppier | **high** | three-layer prompt rebuild; same-task A/B `sdk` vs `cli`; one-line rollback |
+| GLM/DeepSeek tool-calling is less disciplined than Claude Code's built-ins | **high** | only 3 tools with tiny schemas; argument repair; tool errors fed back for self-correction |
+| PID reuse creates a ghost worker, so `hire` never fires | high | `/proc/<pid>/stat` start-time check + dedicated test |
+| Crashed worker leaves orphan nmap/curl children | high | `start_new_session` + `killpg`, TERM → 3s → KILL |
+| Long runs blow the context window | medium | rule-based trim (tool pairs kept valid) + tool output spilled to `logs/` |
+| PTY console trips over TUI escape codes | medium | ANSI-stripped capture + write-through log; worst case degrades to read-only log |
+| `openai` breaks the "zero deps" claim | medium | lazy import + auto fallback to `cli`; README states "stdlib kernel, one optional engine package" |
+| Real-target behavior drifts | medium | one real challenge, same budget, sdk vs cli, before declaring done |
+
+### Explicitly out of scope
+
+No `openai-agents`, no asyncio rewrite, no pydantic/LiteLLM, no Docker sandbox,
+no distributed fleet, no change to `_apply_*` contracts or `Store`/`schema.py`/
+`graph.py` semantics, no tmux fallback (process + console only).
+
+**Read the full spec: [docs/tmux-removal-plan-v3.md](docs/tmux-removal-plan-v3.md)** —
+current-state inventory with line numbers, module contracts, per-file change
+list, the Ben/strix mapping table, and the test matrix.
+
+## 9. Roadmap & Credits
 
 - **Taggant co-building**: decentralized signatures / redundant multi-channel
   marking / zero-key verification for defenders — discuss in issues
@@ -308,4 +444,4 @@ reference; thanks to TSecBench and GeekCon for the battlegrounds.
 
 **Author**: N1nEmAn · VarFusion Lab ｜ WeChat: 未知聚变 (VarFusion)
 
-**License**: MIT (plus [DISCLAIMER.md](DISCLAIMER.md))
+**License**: MIT (plus [DISCLAIMER.md](docs/DISCLAIMER.md))

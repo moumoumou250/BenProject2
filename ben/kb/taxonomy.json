@@ -1,0 +1,20 @@
+{
+  "subjects": {
+    "注入": {
+      "core": ["注入", "injection", "sqli"],
+      "groups": {
+        "二次": ["二次注入", "二阶注入", "存储型注入", "second-order"],
+        "布尔": ["布尔盲注", "boolean blind", "blind sql"],
+        "报错": ["报错注入", "error-based"],
+        "时间": ["时间盲注", "time blind"]
+      }
+    }
+  },
+  "vulns": {
+    "file-write": {
+      "aliases": ["任意文件写入", "任意文件上传", "PUT 写文件", "CVE-2017-12615", "file-write"],
+      "kb": ["kb003"],
+      "tags": ["web", "upload"]
+    }
+  }
+}

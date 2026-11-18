@@ -1,0 +1,32 @@
+name: ci
+
+on:
+  push:
+    branches: [main, master, "refactor/**"]
+  pull_request:
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          python -m pip install -U pip
+          pip install pytest ruff import-linter
+      - name: preflight (arch + pytest)
+        run: bash scripts/ci/preflight.sh
+      - name: ruff
+        run: ruff check ben tests
+      - name: import contracts
+        run: lint-imports
+      - name: lab must stay untracked
+        run: |
+          if git ls-files lab | grep -q .; then
+            echo "lab/ files are tracked — refuse" >&2
+            git ls-files lab >&2
+            exit 1
+          fi
