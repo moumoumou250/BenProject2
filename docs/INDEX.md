@@ -17,3 +17,7 @@ v1/v2/v3 optimization plans are **superseded by**
 Positioning and the phased refactor that follows from it:
 [plans/POSITIONING-PLAN-v1.md](plans/POSITIONING-PLAN-v1.md) — product contract
 (target → findings → report → sandbox → distribution), 6 stages, one commit each.
+
+P1's smallest shippable slice — CLI self-check + deterministic target-site
+testing (`ben doctor` / `ben target` / `ben scan`, S0–S4):
+[plans/CLI-SELFCHECK-TARGET-SCAN.md](plans/CLI-SELFCHECK-TARGET-SCAN.md).
